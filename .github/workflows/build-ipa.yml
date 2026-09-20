@@ -37,7 +37,6 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            CODE_SIGN_ENTITLEMENTS="" \
             build
 
       - name: Package into an .ipa
@@ -74,3 +73,16 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' \
             -derivedDataPath build-sim \
             build
+
+      - name: Package the simulator app (for Appetize.io or a local simulator)
+        run: |
+          APP="build-sim/Build/Products/Debug-iphonesimulator/Emberdeck.app"
+          test -d "$APP" || { echo "No simulator app at $APP"; exit 1; }
+          cd "$(dirname "$APP")" && zip -qry "$GITHUB_WORKSPACE/Emberdeck-simulator.zip" Emberdeck.app
+
+      - name: Upload the simulator build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emberdeck-simulator
+          path: Emberdeck-simulator.zip
+          retention-days: 30

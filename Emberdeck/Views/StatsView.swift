@@ -95,7 +95,7 @@ struct StatsView: View {
     private var cardBreakdown: String {
         var new = 0, young = 0, mature = 0
         for deck in decks {
-            for card in deck.cards {
+            for card in deck.activeCards {
                 if card.state == .new { new += 1 }
                 else if card.isMature { mature += 1 }
                 else { young += 1 }
@@ -115,7 +115,7 @@ struct StatsView: View {
         }
         var forecast = [Int](repeating: 0, count: 14)
         for deck in decks {
-            for card in deck.cards where card.state == .review {
+            for card in deck.activeCards where card.state == .review {
                 let offset = card.dueDay - today
                 if offset < 1 { forecast[0] += 1 }
                 else if offset <= 14 { forecast[offset - 1] += 1 }

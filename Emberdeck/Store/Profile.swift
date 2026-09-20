@@ -56,6 +56,19 @@ struct Settings: Codable, Equatable {
     var appearance: Appearance = .system
     var hapticsEnabled: Bool = true
 
+    /// Duolingo-style chimes on answers and milestones.
+    var soundEffects: Bool = true
+    /// Play a card's own audio (from `[sound:…]`) when it is shown or flipped.
+    var autoPlayCardAudio: Bool = true
+    /// Speak cards that have no audio, using the deck's language.
+    var speakCards: Bool = true
+
+    /// A card lapsed this many times is a leech: tagged and suspended, then
+    /// again every half-threshold after that. 0 turns the rule off.
+    var leechThreshold: Int = 8
+    /// Show four options instead of a blank for a card's very first review.
+    var multipleChoiceForNew: Bool = true
+
     enum Appearance: String, Codable, CaseIterable {
         case system, light, dark
         var title: String { rawValue.capitalized }

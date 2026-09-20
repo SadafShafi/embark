@@ -54,7 +54,7 @@ enum ImportError: LocalizedError {
 enum ApkgImporter {
 
     /// Blocking. Call it off the main actor.
-    static func parse(url: URL, mediaBudget: Int = 60_000_000) throws -> ImportResult {
+    static func parse(url: URL, mediaBudget: Int = 150_000_000) throws -> ImportResult {
         let needsScope = url.startAccessingSecurityScopedResource()
         defer { if needsScope { url.stopAccessingSecurityScopedResource() } }
 
@@ -172,7 +172,7 @@ enum ApkgImporter {
         var written = 0
         var used = 0
         for (entryName, fileName) in object {
-            guard MediaStore.isImage(fileName), archive.contains(entryName) else { continue }
+            guard MediaStore.isWanted(fileName), archive.contains(entryName) else { continue }
             guard let blob = try? archive.extract(entryName) else { continue }
             guard used + blob.count <= budget else { break }
             if MediaStore.write(blob, name: fileName) {

@@ -169,7 +169,7 @@ final class AppModel {
         var c = DueCounts()
         var freshAvailable = 0
 
-        for card in deck.cards {
+        for card in deck.activeCards {
             switch card.state {
             case .new: freshAvailable += 1
             case .learning, .relearning: c.learning += 1
@@ -205,7 +205,7 @@ final class AppModel {
         for deck in decks {
             var newBudget = newCardsRemaining(for: deck)
             var reviewBudget = reviewsAllowed(for: deck)
-            let sorted = deck.cards.sorted { lhs, rhs in
+            let sorted = deck.activeCards.sorted { lhs, rhs in
                 if lhs.state == .new && rhs.state == .new { return lhs.position < rhs.position }
                 return lhs.dueAt < rhs.dueAt
             }
@@ -249,7 +249,20 @@ final class AppModel {
 
         queue.append(contentsOf: interleaved)
         queue.append(contentsOf: learning.filter { $0.dueAt > now })
-        return queue
+        return spaceSiblings(queue)
+    }
+
+    /// Keeps a card and its reverse twin from showing up back to back: seeing
+    /// "der Bahnhof → station" and then immediately "station → ?" is not a
+    /// test of memory. The second sibling is pushed toward the end.
+    private func spaceSiblings(_ queue: [Card]) -> [Card] {
+        var seen = Set<UUID>()
+        var kept: [Card] = []
+        var deferred: [Card] = []
+        for card in queue {
+            if seen.contains(card.noteKey) { deferred.append(card) } else { seen.insert(card.noteKey); kept.append(card) }
+        }
+        return kept + deferred
     }
 
     // MARK: - Badge on the app icon
@@ -257,6 +270,7 @@ final class AppModel {
     func refreshAppBadge(decks: [Deck]) {
         let due = counts(for: decks).total
         UNUserNotificationCenterBadge.set(due)
+        WidgetBridge.publish(model: self, decks: decks)
     }
 
     func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {

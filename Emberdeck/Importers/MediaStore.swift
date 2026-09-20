@@ -45,6 +45,15 @@ enum MediaStore {
         return ["png", "jpg", "jpeg", "gif", "webp", "heic", "bmp"].contains(ext)
     }
 
+    /// Formats AVAudioPlayer can decode. Anki decks also ship .ogg, which iOS
+    /// cannot play natively; those files are skipped at import.
+    static func isPlayableAudio(_ name: String) -> Bool {
+        let ext = (name as NSString).pathExtension.lowercased()
+        return ["mp3", "m4a", "aac", "wav", "aiff", "aif", "caf", "flac"].contains(ext)
+    }
+
+    static func isWanted(_ name: String) -> Bool { isImage(name) || isPlayableAudio(name) }
+
     static func totalBytes() -> Int64 {
         guard let files = try? FileManager.default.contentsOfDirectory(
             at: directory, includingPropertiesForKeys: [.fileSizeKey]) else { return 0 }

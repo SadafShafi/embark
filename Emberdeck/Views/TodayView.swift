@@ -151,15 +151,15 @@ struct DeckRow: View {
     let deck: Deck
     let counts: AppModel.DueCounts
 
-    private var cardCount: Int { deck.cards.count }
+    private var cardCount: Int { deck.activeCards.count }
     private var matureShare: Int {
         guard cardCount > 0 else { return 0 }
-        return Int(Double(deck.cards.filter(\.isMature).count) / Double(cardCount) * 100)
+        return Int(Double(deck.activeCards.filter(\.isMature).count) / Double(cardCount) * 100)
     }
     /// A rough "how well known is this deck" number, in the spirit of a crown level.
     private var level: Int {
         guard cardCount > 0 else { return 0 }
-        let mean = deck.cards.reduce(0.0) { $0 + min($1.interval, 180) } / Double(cardCount)
+        let mean = deck.activeCards.reduce(0.0) { $0 + min($1.interval, 180) } / Double(cardCount)
         return min(13, Int(mean.squareRoot()))
     }
 

@@ -60,6 +60,24 @@ enum CardContent {
         return result
     }
 
+    /// Filenames referenced by `[sound:…]` tags, in order.
+    static func audioNames(from html: String) -> [String] {
+        guard let regex = try? NSRegularExpression(pattern: #"\[sound:([^\]]+)\]"#, options: .caseInsensitive) else { return [] }
+        let ns = html as NSString
+        return regex.matches(in: html, range: NSRange(location: 0, length: ns.length)).map {
+            ns.substring(with: $0.range(at: 1)).trimmingCharacters(in: .whitespaces)
+        }
+    }
+
+    /// What text-to-speech should read: the text with markup, sound tags and
+    /// any bracketed hints like "(m.)" removed.
+    static func speechText(_ html: String) -> String {
+        var text = plainText(html)
+        text = replace(text, pattern: #"\([^)]*\)"#, with: "")
+        text = replace(text, pattern: #"\s+"#, with: " ")
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     /// A one-line version for list rows and search.
     static func plainText(_ html: String) -> String {
         stripTags(stripNoise(html))

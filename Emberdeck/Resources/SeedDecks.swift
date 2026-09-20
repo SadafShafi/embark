@@ -17,6 +17,8 @@ enum SeedDecks {
 
         for spec in all {
             let deck = Deck(name: spec.name)
+            deck.speechLanguage = spec.language
+            deck.speechSide = .front
             context.insert(deck)
             for (index, row) in spec.rows.enumerated() {
                 let parts = row.components(separatedBy: "|")
@@ -35,12 +37,13 @@ enum SeedDecks {
     struct Spec {
         let name: String
         let tag: String
+        let language: String
         let rows: [String]
     }
 
     static let all: [Spec] = [german, spanish]
 
-    static let german = Spec(name: "German A1 — Everyday Core", tag: "a1", rows: [
+    static let german = Spec(name: "German A1 — Everyday Core", tag: "a1", language: "de-DE", rows: [
         "der Bahnhof|the train station (m.)",
         "die Wohnung|the flat, apartment (f.)",
         "das Rathaus|the town hall (n.)",
@@ -103,7 +106,7 @@ enum SeedDecks {
         "obwohl …|… although (verb goes to the end)",
     ])
 
-    static let spanish = Spec(name: "Spanish Starter — First 40", tag: "a1", rows: [
+    static let spanish = Spec(name: "Spanish Starter — First 40", tag: "a1", language: "es-ES", rows: [
         "la casa|the house",
         "el trabajo|the work, job",
         "la ciudad|the city",

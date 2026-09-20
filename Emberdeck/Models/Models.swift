@@ -36,6 +36,21 @@ final class Deck {
     var newLimitOverride: Int?
     var reviewLimitOverride: Int?
 
+    /// Study each note in both directions, as Anki's "Basic (and reversed card)"
+    /// note type does. Reverse cards keep their own scheduling.
+    var studyBothDirections: Bool = false
+
+    /// BCP-47 code for text-to-speech on cards that carry no audio, e.g. "de-DE".
+    /// `nil` means don't speak.
+    var speechLanguage: String?
+    /// Which side is in the foreign language and should be spoken: 0 front, 1 back.
+    var speechSideRaw: Int = 0
+
+    var speechSide: CardSide {
+        get { CardSide(rawValue: speechSideRaw) ?? .front }
+        set { speechSideRaw = newValue.rawValue }
+    }
+
     @Relationship(deleteRule: .cascade, inverse: \Card.deck)
     var cards: [Card] = []
 
@@ -54,6 +69,14 @@ final class Card {
     var back: String = ""
     /// Space-separated, the way Anki stores them.
     var tagString: String = ""
+
+    /// Shared by a forward card and its reverse twin.
+    var noteKey: UUID = UUID()
+    /// A reverse card asks `back` and answers `front`.
+    var isReverse: Bool = false
+
+    /// Set aside from study — by the leech rule, or by hand.
+    var isSuspended: Bool = false
 
     var stateRaw: Int = CardState.new.rawValue
 
@@ -86,20 +109,91 @@ final class Card {
         tagString.split(separator: " ").map(String.init)
     }
 
+    var isLeech: Bool { tags.contains("leech") }
+
+    func addTag(_ tag: String) {
+        guard !tags.contains(tag) else { return }
+        tagString = (tagString + " " + tag).trimmingCharacters(in: .whitespaces)
+    }
+
     /// A card is "mature" once it survives three weeks between reviews.
     var isMature: Bool { state == .review && interval >= 21 }
 
-    init(front: String, back: String, tags: String = "", position: Int = 0, deck: Deck? = nil) {
+    /// What the learner is shown first.
+    var promptHTML: String { isReverse ? back : front }
+    /// What appears when the card is flipped.
+    var answerHTML: String { isReverse ? front : back }
+
+    /// The field in the deck's foreign language, if the deck says which side that is.
+    func foreignHTML(for deck: Deck) -> String {
+        deck.speechSide == .front ? front : back
+    }
+    func foreignSideIsPrompt(for deck: Deck) -> Bool {
+        (deck.speechSide == .front) != isReverse
+    }
+
+    init(front: String, back: String, tags: String = "", position: Int = 0,
+         deck: Deck? = nil, noteKey: UUID = UUID(), isReverse: Bool = false) {
         self.id = UUID()
         self.front = front
         self.back = back
         self.tagString = tags
         self.position = position
         self.deck = deck
+        self.noteKey = noteKey
+        self.isReverse = isReverse
         self.created = Date()
         self.dueAt = Date()
         self.dueDay = 0
     }
+}
+
+enum CardSide: Int, Codable, CaseIterable {
+    case front = 0
+    case back = 1
+    var label: String { self == .front ? "Front" : "Back" }
+}
+
+/// Languages offered for text-to-speech. iOS ships voices for all of these.
+enum SpeechLanguage {
+    static let choices: [(code: String, name: String)] = [
+        ("de-DE", "German"), ("en-GB", "English (UK)"), ("en-US", "English (US)"),
+        ("es-ES", "Spanish (Spain)"), ("es-MX", "Spanish (Mexico)"), ("fr-FR", "French"),
+        ("it-IT", "Italian"), ("pt-BR", "Portuguese (Brazil)"), ("nl-NL", "Dutch"),
+        ("ru-RU", "Russian"), ("pl-PL", "Polish"), ("tr-TR", "Turkish"), ("ar-SA", "Arabic"),
+        ("hi-IN", "Hindi"), ("ja-JP", "Japanese"), ("ko-KR", "Korean"), ("zh-CN", "Chinese (Mandarin)"),
+    ]
+    static func name(for code: String) -> String {
+        choices.first { $0.code == code }?.name ?? code
+    }
+}
+
+// MARK: - Reverse cards
+
+extension Deck {
+    /// Creates the missing reverse twin for every forward card. Idempotent.
+    @discardableResult
+    func ensureReverseCards() -> Int {
+        let existing = Set(cards.filter(\.isReverse).map(\.noteKey))
+        var made = 0
+        // Same position as the forward card, so both directions of a note are
+        // introduced around the same time; the queue keeps them apart.
+        for card in cards where !card.isReverse && !existing.contains(card.noteKey) {
+            let twin = Card(front: card.front, back: card.back, tags: card.tagString,
+                            position: card.position, deck: self, noteKey: card.noteKey, isReverse: true)
+            cards.append(twin)
+            made += 1
+        }
+        return made
+    }
+
+    /// Cards that take part in study right now: not suspended, and honouring
+    /// the direction setting.
+    var activeCards: [Card] {
+        cards.filter { !$0.isSuspended && (studyBothDirections || !$0.isReverse) }
+    }
+
+    var suspendedCards: [Card] { cards.filter(\.isSuspended) }
 }
 
 // MARK: - Day arithmetic

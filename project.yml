@@ -29,3 +29,20 @@ targets:
         MARKETING_VERSION: "1.0"
         ENABLE_PREVIEWS: YES
         GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: Emberdeck.entitlements
+    dependencies:
+      - target: EmberdeckWidgetExtension
+        embed: true
+  EmberdeckWidgetExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: EmberdeckWidget
+    info:
+      path: EmberdeckWidget-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.emberdeck.Emberdeck.widget
+        CODE_SIGN_ENTITLEMENTS: EmberdeckWidget.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES

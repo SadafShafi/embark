@@ -96,10 +96,14 @@ Emberdeck/
 │  ├─ SQLiteDatabase.swift     thin wrapper on system SQLite
 │  ├─ Importers.swift          .apkg reader + CSV/TSV reader
 │  └─ MediaStore.swift         images extracted from decks, on disk
+│  ├─ AudioEngine.swift        chimes, card audio, text-to-speech
+│  └─ WidgetBridge.swift       writes the snapshot the widget reads
 ├─ Views/                      Theme, Today, Study, Decks, Progress, Settings
 └─ Resources/
    ├─ SeedDecks.swift          two starter decks for a fresh install
+   ├─ Sounds/                  six synthesised .wav effects
    └─ Assets.xcassets          app icon, accent colour
+EmberdeckWidget/               WidgetKit extension (its own target)
 ```
 
 ### Scheduling
@@ -137,6 +141,61 @@ met — today's is dropped the moment you hit your target. There's a second,
 time-sensitive "streak at risk" series at 21:30 that only appears once a streak
 is worth saving.
 
+### Both directions
+
+A deck's **Study both directions** switch creates a reverse twin for every
+card (`Deck.ensureReverseCards`), sharing a `noteKey` but scheduled
+independently — exactly what Anki's *Basic (and reversed card)* note type does.
+`AppModel.spaceSiblings` keeps the two directions of one note from appearing
+back to back in a session. Switching it off hides the reverse cards without
+losing their progress.
+
+### Sound
+
+`AudioEngine` handles three things through the ambient audio session (silent
+switch respected, music keeps playing):
+
+- **Effects** — six short chimes in `Resources/Sounds/`, synthesised rather
+  than sampled, so they're tiny and licence-free: correct, wrong, flip, combo,
+  session complete, streak advanced.
+- **Card audio** — `[sound:file.mp3]` tags survive import (`MediaStore` keeps
+  mp3/m4a/wav/aac/flac; `.ogg` is skipped because iOS can't decode it) and
+  play automatically when the side they're on is shown.
+- **Speech** — for cards with no recording, `AVSpeechSynthesizer` reads the
+  foreign side in the language set on the deck. Free, offline, and the
+  starter decks come with German and Spanish preset.
+
+### Undo, leeches, multiple choice
+
+- **Undo** (`StudySession.undo`) is one level deep and restores everything the
+  answer touched: the card's scheduling, the XP/streak bookkeeping (the whole
+  `Profile` is snapshotted — it's small), and the session counters. The card
+  comes back with its answer showing so it can be regraded.
+- **Leeches** follow Anki's rule in `applyLeechRule`: a card that lapses
+  `leechThreshold` times (default 8) is tagged `leech` and suspended, then again
+  every half-threshold. Suspended cards drop out of `Deck.activeCards`; the deck
+  screen lists them and can bring them back in one tap.
+- **Multiple choice** appears only for a card's very first showing
+  (`state == .new && reps == 0`). Three distractors are drawn from the same
+  deck and direction; picking auto-grades Good or Again. It needs at least
+  four distinct answers in the deck, otherwise the card falls back to a plain
+  reveal. Off switch in Settings.
+
+### Widget
+
+`EmberdeckWidget/` is a second target: a WidgetKit extension with small,
+medium, and Lock Screen (circular, rectangular) families showing the streak,
+today's goal and the due count. The app writes a `WidgetSnapshot` into the
+**App Group** `group.com.emberdeck.shared` after every session and on launch
+(`WidgetBridge.publish`), then asks WidgetKit to reload.
+
+The widget reads its data through that App Group, which is an entitlement.
+Building from Xcode with your own team sets it up automatically (free
+personal teams support App Groups). **Sideloading the unsigned CI build** is
+the one place it can bite: AltStore/SideStore re-sign with their own
+entitlements and may rename or drop the group. If the widget shows "Open
+Emberdeck once" forever, that's why — the app itself is unaffected.
+
 ### Importing
 
 `.apkg` is a ZIP holding a SQLite database. `ZipArchive` reads the central
@@ -154,27 +213,28 @@ and the older JSON blob on `col`.
 - `collection.anki21b` (Anki's newer zstd-compressed export) is rejected with a
   message telling you to re-export with *Support older Anki versions* ticked.
   Adding zstd would mean a dependency; see "Ideas" below.
-- Audio (`[sound:…]`) is stripped. Images import from classic-format decks.
+- Images and playable audio import from classic-format decks; `.ogg` is skipped.
 
 ---
 
 ## Ideas, roughly in order of value
 
-1. **FSRS instead of SM-2.** Measurably better retention per review. Contained
+1. **Typed answers**, with a diff of what was wrong. Duolingo's core mechanic;
+   fixes "I *thought* I knew it". Slots in beside the multiple-choice footer.
+2. **FSRS instead of SM-2.** Measurably better retention per review. Contained
    to `Scheduler`.
-2. **zstd, for modern `.apkg`.** Add a zstd package via SPM and decompress
+3. **zstd, for modern `.apkg`.** Add a zstd package via SPM and decompress
    `collection.anki21b` in `ApkgImporter.parse` — the branch that currently
    throws `.zstdUnsupported` is where it plugs in.
-3. **Audio.** `MediaStore` already lands files on disk; wire `[sound:…]` to
-   `AVAudioPlayer` rather than stripping it in `CardContent.stripNoise`.
-4. **Card templates**, so a note can generate several cards properly. This is
+4. **`.ogg` audio.** Many shared decks use it; iOS won't decode it. Either
+   transcode on import with a small Vorbis decoder package, or convert on the
+   desktop before exporting.
+5. **Card templates**, so a note can generate several cards properly. This is
    the biggest change: it needs the `notetypes`/`templates` tables and a
    `{{Field}}` renderer.
-5. **iCloud sync.** `ModelConfiguration` takes a CloudKit container; the models
+6. **iCloud sync.** `ModelConfiguration` takes a CloudKit container; the models
    are already CloudKit-shaped (every property has a default, no uniqueness
-   constraints).
-6. **Widgets and a Live Activity** for the streak. `Profile` is Codable, so an
-   App Group and a shared UserDefaults suite is most of the work.
+   constraints). Needs a paid developer account.
 7. **Tests.** There is no test target yet. `Scheduler`, `DayMath`, `ZipArchive`
    and `DelimitedImporter.splitRow` are all pure and worth pinning down first.
 

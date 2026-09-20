@@ -52,8 +52,51 @@ struct DeckDetailView: View {
                 LabeledContent("Learning") { Text("\(counts.learning)").font(.edMono(14)) }
                 LabeledContent("Due for review") { Text("\(counts.review)").font(.edMono(14)) }
                 LabeledContent("Mature (21d+)") {
-                    Text("\(deck.cards.filter(\.isMature).count)").font(.edMono(14))
+                    Text("\(deck.activeCards.filter(\.isMature).count)").font(.edMono(14))
                 }
+                if !deck.suspendedCards.isEmpty {
+                    LabeledContent("Suspended") {
+                        Text("\(deck.suspendedCards.count)").font(.edMono(14))
+                    }
+                    Button("Bring suspended cards back") {
+                        for card in deck.suspendedCards { card.isSuspended = false }
+                        save()
+                    }
+                }
+            }
+
+            Section {
+                Toggle("Study both directions", isOn: bothDirectionsBinding)
+                if deck.studyBothDirections {
+                    LabeledContent("Reverse cards") {
+                        Text("\(deck.cards.filter(\.isReverse).count)").font(.edMono(14))
+                    }
+                }
+            } header: {
+                Text("Direction")
+            } footer: {
+                Text(deck.studyBothDirections
+                     ? "Every note is also asked back-to-front, with its own schedule. Turning this off hides the reverse cards but keeps their progress."
+                     : "Also ask each card back-to-front — English → German as well as German → English.")
+            }
+
+            Section {
+                Picker("Language", selection: speechLanguageBinding) {
+                    Text("Off").tag("")
+                    ForEach(SpeechLanguage.choices, id: \.code) { choice in
+                        Text(choice.name).tag(choice.code)
+                    }
+                }
+                if deck.speechLanguage != nil {
+                    Picker("Foreign side", selection: speechSideBinding) {
+                        ForEach(CardSide.allCases, id: \.self) { Text($0.label).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            } header: {
+                Text("Pronunciation")
+            } footer: {
+                Text("Cards with their own audio play it. Cards without are read aloud by iOS in this language — pick which side holds the foreign words.")
             }
 
             Section {
@@ -105,6 +148,28 @@ struct DeckDetailView: View {
             Button("Delete deck", role: .destructive) { deleteDeck() }
             Button("Cancel", role: .cancel) {}
         }
+    }
+
+    private var bothDirectionsBinding: Binding<Bool> {
+        Binding(
+            get: { deck.studyBothDirections },
+            set: { on in
+                deck.studyBothDirections = on
+                if on { deck.ensureReverseCards() }
+                save()
+            }
+        )
+    }
+
+    private var speechLanguageBinding: Binding<String> {
+        Binding(
+            get: { deck.speechLanguage ?? "" },
+            set: { deck.speechLanguage = $0.isEmpty ? nil : $0; save() }
+        )
+    }
+
+    private var speechSideBinding: Binding<CardSide> {
+        Binding(get: { deck.speechSide }, set: { deck.speechSide = $0; save() })
     }
 
     private var newLimitBinding: Binding<Int> {
@@ -211,14 +276,16 @@ struct CardBrowserView: View {
                     EditCardView(card: card)
                 } label: {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(CardContent.plainText(card.front))
+                        Text(CardContent.plainText(card.promptHTML))
                             .font(.system(size: 15, weight: .medium))
                             .lineLimit(1)
-                        Text(CardContent.plainText(card.back))
+                        Text(CardContent.plainText(card.answerHTML))
                             .font(.system(size: 13))
                             .foregroundStyle(Color.edMuted)
                             .lineLimit(1)
                         HStack(spacing: 6) {
+                            if card.isSuspended { Text("suspended ·").foregroundStyle(Color.edDanger) }
+                            if card.isReverse { Text("reverse ·") }
                             Text(card.state.label)
                             if card.state == .review {
                                 Text("· \(Scheduler.formatDays(card.interval))")
@@ -254,6 +321,7 @@ struct EditCardView: View {
             Section("Back") { TextField("Back", text: $card.back, axis: .vertical) }
             Section("Tags") { TextField("Space separated", text: $card.tagString) }
             Section("Scheduling") {
+                Toggle("Suspended", isOn: $card.isSuspended)
                 LabeledContent("State") { Text(card.state.label).font(.edMono(14)) }
                 LabeledContent("Interval") { Text(Scheduler.formatDays(card.interval)).font(.edMono(14)) }
                 LabeledContent("Ease") { Text("\(card.ease / 10)%").font(.edMono(14)) }

@@ -16,6 +16,9 @@ struct BackupCard: Codable {
     var front: String
     var back: String
     var tags: String
+    var noteKey: UUID?
+    var isReverse: Bool?
+    var isSuspended: Bool?
     var state: Int
     var position: Int
     var dueAt: Date
@@ -34,6 +37,9 @@ struct BackupDeck: Codable {
     var created: Date
     var newLimitOverride: Int?
     var reviewLimitOverride: Int?
+    var studyBothDirections: Bool?
+    var speechLanguage: String?
+    var speechSide: Int?
     var cards: [BackupCard]
 }
 
@@ -56,8 +62,12 @@ enum Backup {
                 created: deck.created,
                 newLimitOverride: deck.newLimitOverride,
                 reviewLimitOverride: deck.reviewLimitOverride,
+                studyBothDirections: deck.studyBothDirections,
+                speechLanguage: deck.speechLanguage,
+                speechSide: deck.speechSideRaw,
                 cards: deck.cards.sorted { $0.position < $1.position }.map { card in
                     BackupCard(front: card.front, back: card.back, tags: card.tagString,
+                               noteKey: card.noteKey, isReverse: card.isReverse, isSuspended: card.isSuspended,
                                state: card.stateRaw, position: card.position,
                                dueAt: card.dueAt, dueDay: card.dueDay,
                                interval: card.interval, ease: card.ease,
@@ -91,12 +101,17 @@ enum Backup {
             let deck = Deck(name: snapshot.name, created: snapshot.created)
             deck.newLimitOverride = snapshot.newLimitOverride
             deck.reviewLimitOverride = snapshot.reviewLimitOverride
+            deck.studyBothDirections = snapshot.studyBothDirections ?? false
+            deck.speechLanguage = snapshot.speechLanguage
+            deck.speechSideRaw = snapshot.speechSide ?? 0
             context.insert(deck)
 
             for saved in snapshot.cards {
                 let card = Card(front: saved.front, back: saved.back,
-                                tags: saved.tags, position: saved.position, deck: deck)
+                                tags: saved.tags, position: saved.position, deck: deck,
+                                noteKey: saved.noteKey ?? UUID(), isReverse: saved.isReverse ?? false)
                 card.stateRaw = saved.state
+                card.isSuspended = saved.isSuspended ?? false
                 card.dueAt = saved.dueAt
                 card.dueDay = saved.dueDay
                 card.interval = saved.interval

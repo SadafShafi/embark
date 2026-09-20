@@ -6,17 +6,57 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ED000000000000000000002A /* EmberdeckWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = ED0000000000000000000020 /* EmberdeckWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		ED000000000000000000002C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED0000000000000000000022;
+			remoteInfo = EmberdeckWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		ED0000000000000000000029 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				ED000000000000000000002A /* EmberdeckWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		ED0000000000000000000005 /* Emberdeck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Emberdeck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED0000000000000000000010 /* Emberdeck-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Emberdeck-Info.plist"; sourceTree = "<group>"; };
+		ED0000000000000000000020 /* EmberdeckWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EmberdeckWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED000000000000000000002D /* Emberdeck.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Emberdeck.entitlements; sourceTree = "<group>"; };
+		ED000000000000000000002E /* EmberdeckWidget-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "EmberdeckWidget-Info.plist"; sourceTree = "<group>"; };
+		ED000000000000000000002F /* EmberdeckWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EmberdeckWidget.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		ED0000000000000000000009 /* Emberdeck */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Emberdeck; sourceTree = "<group>"; };
+		ED0000000000000000000021 /* EmberdeckWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = EmberdeckWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		ED0000000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED0000000000000000000024 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -30,7 +70,11 @@
 			isa = PBXGroup;
 			children = (
 				ED0000000000000000000009 /* Emberdeck */,
+				ED0000000000000000000021 /* EmberdeckWidget */,
 				ED0000000000000000000010 /* Emberdeck-Info.plist */,
+				ED000000000000000000002D /* Emberdeck.entitlements */,
+				ED000000000000000000002E /* EmberdeckWidget-Info.plist */,
+				ED000000000000000000002F /* EmberdeckWidget.entitlements */,
 				ED0000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -39,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				ED0000000000000000000005 /* Emberdeck.app */,
+				ED0000000000000000000020 /* EmberdeckWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,10 +98,12 @@
 				ED0000000000000000000006 /* Sources */,
 				ED0000000000000000000007 /* Frameworks */,
 				ED0000000000000000000008 /* Resources */,
+				ED0000000000000000000029 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				ED000000000000000000002B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				ED0000000000000000000009 /* Emberdeck */,
@@ -65,6 +112,26 @@
 			productName = Emberdeck;
 			productReference = ED0000000000000000000005 /* Emberdeck.app */;
 			productType = "com.apple.product-type.application";
+		};
+		ED0000000000000000000022 /* EmberdeckWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED0000000000000000000026 /* Build configuration list for PBXNativeTarget "EmberdeckWidgetExtension" */;
+			buildPhases = (
+				ED0000000000000000000023 /* Sources */,
+				ED0000000000000000000024 /* Frameworks */,
+				ED0000000000000000000025 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				ED0000000000000000000021 /* EmberdeckWidget */,
+			);
+			name = EmberdeckWidgetExtension;
+			productName = EmberdeckWidgetExtension;
+			productReference = ED0000000000000000000020 /* EmberdeckWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -77,6 +144,9 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					ED0000000000000000000004 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					ED0000000000000000000022 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
@@ -97,12 +167,20 @@
 			projectRoot = "";
 			targets = (
 				ED0000000000000000000004 /* Emberdeck */,
+				ED0000000000000000000022 /* EmberdeckWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		ED0000000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED0000000000000000000025 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -119,7 +197,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ED0000000000000000000023 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		ED000000000000000000002B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED0000000000000000000022 /* EmberdeckWidgetExtension */;
+			targetProxy = ED000000000000000000002C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		ED000000000000000000000C /* Debug */ = {
@@ -179,6 +272,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Emberdeck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -202,6 +296,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Emberdeck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -215,6 +310,52 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.emberdeck.Emberdeck;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		ED0000000000000000000027 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EmberdeckWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "EmberdeckWidget-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emberdeck.Emberdeck.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		ED0000000000000000000028 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EmberdeckWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "EmberdeckWidget-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emberdeck.Emberdeck.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -237,6 +378,15 @@
 			buildConfigurations = (
 				ED000000000000000000000E /* Debug */,
 				ED000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ED0000000000000000000026 /* Build configuration list for PBXNativeTarget "EmberdeckWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED0000000000000000000027 /* Debug */,
+				ED0000000000000000000028 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

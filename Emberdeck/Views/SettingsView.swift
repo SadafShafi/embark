@@ -73,10 +73,28 @@ struct SettingsView: View {
                             Text("\(model.settings.maxReviewsPerDay)").font(.edMono(14))
                         }
                     }
+                    Stepper(value: $model.settings.leechThreshold, in: 0...30) {
+                        LabeledContent("Leech threshold") {
+                            Text(model.settings.leechThreshold == 0 ? "Off" : "\(model.settings.leechThreshold)")
+                                .font(.edMono(14))
+                        }
+                    }
+                    Toggle("Multiple choice for new cards", isOn: $model.settings.multipleChoiceForNew)
                 } header: {
-                    Text("Session limits")
+                    Text("Session")
                 } footer: {
-                    Text("Applied per deck. A deck can override the new-card limit on its own screen.")
+                    Text("Limits apply per deck; a deck can override its new-card limit. A card that lapses as many times as the leech threshold is tagged and set aside, as Anki does. Multiple choice shows four options the first time a card ever appears.")
+                }
+
+                // MARK: Sound
+                Section {
+                    Toggle("Sound effects", isOn: $model.settings.soundEffects)
+                    Toggle("Play card audio", isOn: $model.settings.autoPlayCardAudio)
+                    Toggle("Read cards aloud", isOn: $model.settings.speakCards)
+                } header: {
+                    Text("Sound")
+                } footer: {
+                    Text("Card audio comes from the deck's own recordings. Reading aloud uses the iOS voice for the language set on each deck, only for cards with no recording. All of it respects the silent switch.")
                 }
 
                 // MARK: Appearance

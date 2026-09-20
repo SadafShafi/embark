@@ -40,6 +40,10 @@ struct RootView: View {
             StudyView(session: active) { result in
                 session = nil
                 summary = result
+                if result.answered > 0 {
+                    AudioEngine.shared.play(result.streakAdvanced ? .streak : .complete,
+                                            enabled: model.settings.soundEffects)
+                }
                 model.refreshAppBadge(decks: decks)
                 Task { await NotificationManager.shared.reschedule(using: model) }
             }
