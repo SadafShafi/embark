@@ -1,0 +1,76 @@
+name: Build unsigned IPA
+
+# Produces an installable-but-unsigned Emberdeck.ipa on a GitHub macOS runner,
+# so you can get a build without owning a Mac. Sign it on the device with
+# AltStore or SideStore, or resign it yourself if you have a certificate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i iphoneos || true
+
+      - name: Build (Release, unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Emberdeck.xcodeproj \
+            -scheme Emberdeck \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            -destination 'generic/platform=iOS' \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            build
+
+      - name: Package into an .ipa
+        run: |
+          APP="build/Build/Products/Release-iphoneos/Emberdeck.app"
+          test -d "$APP" || { echo "No app bundle at $APP"; exit 1; }
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qry Emberdeck-unsigned.ipa Payload
+          ls -lh Emberdeck-unsigned.ipa
+
+      - name: Upload the IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emberdeck-unsigned-ipa
+          path: Emberdeck-unsigned.ipa
+          retention-days: 30
+
+  # A simulator build is a cheap smoke test that the app actually compiles and
+  # launches, without needing any signing at all.
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build for the simulator
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Emberdeck.xcodeproj \
+            -scheme Emberdeck \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' \
+            -derivedDataPath build-sim \
+            build

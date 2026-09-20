@@ -1,0 +1,15 @@
+# Xcode
+build/
+build-sim/
+DerivedData/
+*.xcarchive
+*.ipa
+Payload/
+xcuserdata/
+*.xcuserstate
+*.moved-aside
+.DS_Store
+
+# Swift Package Manager
+.build/
+.swiftpm/

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Used only if you archive with a real signing identity:
+	     xcodebuild -exportArchive -archivePath Emberdeck.xcarchive \
+	       -exportOptionsPlist ExportOptions.plist -exportPath dist -->
+	<key>method</key>
+	<string>development</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>compileBitcode</key>
+	<false/>
+	<key>destination</key>
+	<string>export</string>
+</dict>
+</plist>
